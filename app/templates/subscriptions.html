@@ -1,4 +1,197 @@
 {% extends "base.html" %}
+{% block title %}Subscriptions · FinTrack{% endblock %}
+
 {% block content %}
-<h1>Subscriptions</h1>
+
+{# ── Helpers ─────────────────────────────────────────────── #}
+{% macro currency(val) %}₹{{ '{:,.2f}'.format(val|float) }}{% endmacro %}
+
+<div class="page-header">
+    <div class="page-header__eyebrow">Recurring</div>
+    <div class="d-flex align-center justify-between">
+        <div>
+            <h1>Subscriptions</h1>
+            <p>Track and manage your recurring bills and services.</p>
+        </div>
+        <a href="{{ url_for('subscriptions.create') }}" class="btn btn--primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Subscription
+        </a>
+    </div>
+</div>
+
+{# ── Summary Cards ───────────────────────────────────────── #}
+<div class="grid-3 mb-6">
+    <div class="card stat-card">
+        <div class="stat-card__icon stat-icon--balance">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div class="stat-card__label">Monthly Recurring</div>
+        <div class="stat-card__value">{{ currency(monthly_total) }}</div>
+        <div class="stat-card__delta">Total Cost / Month</div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-card__icon stat-icon--expense">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-card__label">Upcoming Payments</div>
+        <div class="stat-card__value">{{ upcoming_count }}</div>
+        <div class="stat-card__delta">Next 7 Days</div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="stat-card__icon stat-icon--income">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="stat-card__label">Annual Equivalent</div>
+        <div class="stat-card__value">{{ currency(monthly_total * 12) }}</div>
+        <div class="stat-card__delta">Estimated Yearly</div>
+    </div>
+</div>
+
+{# ── Subscriptions List ──────────────────────────────────── #}
+<div class="card">
+    {% if subscriptions %}
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Service Name</th>
+                    <th>Status</th>
+                    <th>Billing Cycle</th>
+                    <th>Next Due Date</th>
+                    <th class="text-right">Amount</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in subscriptions %}
+                <tr class="{% if sub.is_overdue %}table-row--danger{% elif sub.is_upcoming %}table-row--warning{% endif %}">
+                    <td>
+                        <div class="d-flex align-center">
+                            <div class="service-icon mr-3">
+                                {{ sub.name[0]|upper }}
+                            </div>
+                            <strong>{{ sub.name }}</strong>
+                        </div>
+                    </td>
+                    <td>
+                        {% if sub.status == 'active' %}
+                        <span class="badge badge--success">Active</span>
+                        {% elif sub.status == 'paused' %}
+                        <span class="badge badge--warning">Paused</span>
+                        {% else %}
+                        <span class="badge badge--neutral">Cancelled</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="text-capitalize">{{ sub.billing_cycle }}</span></td>
+                    <td>
+                        <div class="due-date">
+                            <span class="d-block">{{ sub.next_due_date.strftime('%b %d, %Y') }}</span>
+                            {% if sub.is_overdue %}
+                            <small class="text-danger">Overdue</small>
+                            {% elif sub.is_upcoming %}
+                            <small class="text-warning">Due in {{ sub.days_remaining }} days</small>
+                            {% else %}
+                            <small class="text-muted">In {{ sub.days_remaining }} days</small>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="text-right">
+                        <span class="text-danger font-weight-bold">{{ currency(sub.amount) }}</span>
+                    </td>
+                    <td class="text-right">
+                        <div class="d-flex justify-end gap-2">
+                            <a href="{{ url_for('subscriptions.edit', sub_id=sub.id) }}" class="btn btn--icon btn--ghost" title="Edit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </a>
+                            <form action="{{ url_for('subscriptions.delete', sub_id=sub.id) }}" method="POST" onsubmit="return confirm('Delete this subscription?');">
+                                <button type="submit" class="btn btn--icon btn--ghost text-danger" title="Delete">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state__icon text-muted mb-4">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+        <h3>No subscriptions found</h3>
+        <p>Start tracking your recurring expenses to get better financial insights.</p>
+        <a href="{{ url_for('subscriptions.create') }}" class="btn btn--primary mt-4">Add Your First Subscription</a>
+    </div>
+    {% endif %}
+</div>
+
+{# ── Add/Edit Modal ── #}
+{% if show_modal %}
+<div class="modal-overlay" id="subModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">{{ action }} Subscription</h2>
+            <a href="{{ url_for('subscriptions.index') }}" class="btn btn--icon btn--ghost">&times;</a>
+        </div>
+        <div class="modal-body">
+            <form action="{{ url_for('subscriptions.edit', sub_id=sub_id) if action == 'Edit' else url_for('subscriptions.create') }}" method="POST" class="auth-form" novalidate>
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-input") }}
+                    {% for error in form.name.errors %}
+                        <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="grid-2 gap-4">
+                    <div class="form-group">
+                        {{ form.amount.label(class="form-label") }}
+                        {{ form.amount(class="form-input") }}
+                        {% for error in form.amount.errors %}
+                            <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.billing_cycle.label(class="form-label") }}
+                        {{ form.billing_cycle(class="form-input") }}
+                        {% for error in form.billing_cycle.errors %}
+                            <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="grid-2 gap-4">
+                    <div class="form-group">
+                        {{ form.next_due_date.label(class="form-label") }}
+                        {{ form.next_due_date(class="form-input", type="date") }}
+                        {% for error in form.next_due_date.errors %}
+                            <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.status.label(class="form-label") }}
+                        {{ form.status(class="form-input") }}
+                        {% for error in form.status.errors %}
+                            <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mt-6 d-flex gap-2">
+                    {{ form.submit(class="btn btn--primary btn--full") }}
+                    <a href="{{ url_for('subscriptions.index') }}" class="btn btn--ghost btn--full">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

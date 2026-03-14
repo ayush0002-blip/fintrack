@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} · FinTrack{% endblock %}
+
+{% block content %}
+
+{% macro field_errors(field) %}
+  {% for error in field.errors %}
+    <p class="form-error">{{ error }}</p>
+  {% endfor %}
+{% endmacro %}
+
+{# ── Page header ─────────────────────────────────────────── #}
+<div class="page-header">
+  <div class="page-header__eyebrow">Transactions</div>
+  <div class="d-flex align-center gap-4">
+    <a href="{{ url_for('transactions.index') }}" class="btn btn--ghost btn--sm">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </a>
+    <h1>{{ action }}</h1>
+  </div>
+</div>
+
+{# ── Form card ───────────────────────────────────────────── #}
+<div class="form-page-grid">
+  <div class="card">
+    <form method="POST" novalidate id="txn-form">
+      {{ form.hidden_tag() }}
+
+      {# ── Type toggle (visual chips) ────────────────────── #}
+      <div class="form-group">
+        {{ form.type.label(class='form-label') }}
+        <div class="type-toggle" role="group" aria-label="Transaction type">
+          {% for subfield in form.type %}
+          <label class="type-toggle__option {% if subfield.checked or (not txn and subfield.data == 'expense') %}type-toggle__option--active{% endif %}"
+                 id="label-{{ subfield.id }}"
+                 data-value="{{ subfield.data }}">
+            {{ subfield(class='type-toggle__radio') }}
+            {% if subfield.data == 'income' %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            {% else %}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+            {% endif %}
+            {{ subfield.label.text }}
+          </label>
+          {% endfor %}
+        </div>
+        {{ field_errors(form.type) }}
+      </div>
+
+      {# ── Title ────────────────────────────────────────── #}
+      <div class="form-group">
+        {{ form.title.label(class='form-label') }}
+        {{ form.title(class='form-control' + (' form-control--error' if form.title.errors else ''), id='field-title') }}
+        {{ field_errors(form.title) }}
+      </div>
+
+      {# ── Amount + Category row ────────────────────────── #}
+      <div class="form-row-2">
+        <div class="form-group">
+          {{ form.amount.label(class='form-label') }}
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">₹</span>
+            {{ form.amount(class='form-control input-prefix-control' + (' form-control--error' if form.amount.errors else ''), id='field-amount') }}
+          </div>
+          {{ field_errors(form.amount) }}
+        </div>
+        <div class="form-group">
+          {{ form.category.label(class='form-label') }}
+          {{ form.category(class='form-control' + (' form-control--error' if form.category.errors else ''), id='field-category') }}
+          {{ field_errors(form.category) }}
+        </div>
+      </div>
+
+      {# ── Date ─────────────────────────────────────────── #}
+      <div class="form-group">
+        {{ form.date.label(class='form-label') }}
+        {{ form.date(class='form-control' + (' form-control--error' if form.date.errors else ''), id='field-date',
+                     type='date',
+                     max=today.strftime('%Y-%m-%d') if today is defined else '') }}
+        {{ field_errors(form.date) }}
+      </div>
+
+      {# ── Note ─────────────────────────────────────────── #}
+      <div class="form-group">
+        {{ form.note.label(class='form-label') }}
+        {{ form.note(class='form-control' + (' form-control--error' if form.note.errors else ''), id='field-note') }}
+        <p class="form-hint">Optional — describe the transaction in more detail.</p>
+        {{ field_errors(form.note) }}
+      </div>
+
+      {# ── Actions ──────────────────────────────────────── #}
+      <div class="form-actions">
+        <a href="{{ url_for('transactions.index') }}" class="btn btn--ghost">Cancel</a>
+        {{ form.submit(class='btn btn--primary', id='txn-submit') }}
+      </div>
+
+    </form>
+  </div>
+
+  {# ── Side help card ─────────────────────────────────── #}
+  <div class="form-side">
+    <div class="card card--flat form-tips">
+      <div class="card__header">
+        <span class="card__title">Tips</span>
+      </div>
+      <ul class="form-tips__list">
+        <li>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Use a descriptive title — it makes searching easier later.
+        </li>
+        <li>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Pick the right category so budget tracking stays accurate.
+        </li>
+        <li>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Dates cannot be in the future.
+        </li>
+        <li>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          The note field is great for receipts, vendor names, or references.
+        </li>
+      </ul>
+    </div>
+
+    {% if txn %}
+    <div class="card card--flat mt-6" style="border-color:var(--danger-light)">
+      <div class="card__header">
+        <span class="card__title text-danger">Danger Zone</span>
+      </div>
+      <p class="mb-4" style="font-size:0.875rem">Deleting a transaction is permanent and cannot be undone.</p>
+      <form action="{{ url_for('transactions.delete', txn_id=txn.id) }}" method="POST"
+            onsubmit="return confirm('Delete this transaction permanently?')">
+        {{ form.hidden_tag() }}
+        <button type="submit" class="btn btn--danger btn--sm btn--full">Delete this transaction</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+</div>{# /form-page-grid #}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* ── Type toggle visual state ──────────────────────────── */
+document.querySelectorAll('.type-toggle__radio').forEach(function(radio) {
+  radio.addEventListener('change', function() {
+    document.querySelectorAll('.type-toggle__option').forEach(function(label) {
+      label.classList.remove('type-toggle__option--active');
+    });
+    this.closest('.type-toggle__option').classList.add('type-toggle__option--active');
+  });
+});
+
+/* ── Set today's date as default on new form ────────────── */
+(function() {
+  const dateField = document.getElementById('field-date');
+  if (dateField && !dateField.value) {
+    const today = new Date().toISOString().split('T')[0];
+    dateField.value = today;
+  }
+})();
+</script>
+{% endblock %}

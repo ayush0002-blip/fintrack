@@ -1,4 +1,105 @@
 {% extends "base.html" %}
+{% block title %}Settings · FinTrack{% endblock %}
+
 {% block content %}
-<h1>Settings</h1>
+<div class="page-header">
+    <div class="page-header__eyebrow">Preferences</div>
+    <h1>Account Settings</h1>
+    <p>Manage your profile details and security settings.</p>
+</div>
+
+<div class="dash-grid">
+    {# ── Left Column: Profile Settings ── #}
+    <section>
+        <div class="card">
+            <div class="card__header">
+                <span class="card__title">Profile Information</span>
+            </div>
+            <div class="card__body">
+                <form action="{{ url_for('settings.index') }}" method="POST" class="auth-form" novalidate>
+                    {{ profile_form.hidden_tag() }}
+                    
+                    <div class="form-group">
+                        {{ profile_form.full_name.label(class="form-label") }}
+                        {{ profile_form.full_name(class="form-input") }}
+                        {% for error in profile_form.full_name.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ profile_form.email.label(class="form-label") }}
+                        {{ profile_form.email(class="form-input") }}
+                        {% for error in profile_form.email.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-4">
+                        {{ profile_form.submit(class="btn btn--primary btn--full") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    {# ── Right Column: Security Settings ── #}
+    <section>
+        <div class="card">
+            <div class="card__header">
+                <span class="card__title">Security & Password</span>
+            </div>
+            <div class="card__body">
+                <form action="{{ url_for('settings.index') }}" method="POST" class="auth-form" novalidate>
+                    {{ password_form.hidden_tag() }}
+                    
+                    <div class="form-group">
+                        {{ password_form.current_password.label(class="form-label") }}
+                        {{ password_form.current_password(class="form-input") }}
+                        {% for error in password_form.current_password.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ password_form.new_password.label(class="form-label") }}
+                        {{ password_form.new_password(class="form-input") }}
+                        {% for error in password_form.new_password.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                        <small class="text-muted mt-1 d-block">Minimum 8 characters.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ password_form.confirm_password.label(class="form-label") }}
+                        {{ password_form.confirm_password(class="form-input") }}
+                        {% for error in password_form.confirm_password.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-4">
+                        {{ password_form.submit(class="btn btn--danger btn--full") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+
+{# ── Account Deletion (Optional UI placeholder) ── #}
+<div class="mt-8 pt-8 border-top">
+    <div class="card border-danger">
+        <div class="card__header">
+            <span class="card__title text-danger">Danger Zone</span>
+        </div>
+        <div class="card__body d-flex align-center justify-between">
+            <div>
+                <strong>Delete Account</strong>
+                <p class="text-muted mb-0">Permanently remove your account and all financial data. This action is irreversible.</p>
+            </div>
+            <button class="btn btn--ghost text-danger" disabled>Delete Account</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
