@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import (
     StringField, DecimalField, SelectField,
     DateField, TextAreaField, IntegerField, SubmitField,
-    PasswordField
+    PasswordField, RadioField
 )
 from wtforms.validators import (
     DataRequired, Length, NumberRange, Optional, ValidationError,
@@ -45,7 +45,7 @@ class TransactionForm(FlaskForm):
         render_kw={'placeholder': '0.00', 'step': '0.01', 'min': '0.01'},
     )
 
-    type = SelectField(
+    type = RadioField(
         'Type',
         choices=[
             (Transaction.TYPE_INCOME,  'Income'),

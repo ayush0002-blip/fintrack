@@ -7,6 +7,11 @@ load_dotenv(os.path.join(basedir, '.env'))
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard-to-guess-string'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # Plaid Configuration
+    PLAID_CLIENT_ID = os.environ.get('PLAID_CLIENT_ID')
+    PLAID_SECRET = os.environ.get('PLAID_SECRET')
+    PLAID_ENV = os.environ.get('PLAID_ENV', 'sandbox')
 
 class DevelopmentConfig(Config):
     DEBUG = True
