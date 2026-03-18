@@ -16,36 +16,6 @@
             {% endif %}
         </div>
     </div>
-    
-    <div class="hero-section__image">
-        <div class="mockup-card">
-            <div class="mockup-card__header">
-                <div class="mockup-card__dots">
-                    <span></span><span></span><span></span>
-                </div>
-                <div class="mockup-card__title">Dashboard Preview</div>
-            </div>
-            <div class="mockup-card__body">
-                <div class="mockup-stat-grid">
-                    <div class="mockup-stat">
-                        <span class="mockup-stat__label">Total Balance</span>
-                        <span class="mockup-stat__value">₹1,24,500.00</span>
-                    </div>
-                    <div class="mockup-stat">
-                        <span class="mockup-stat__label">Monthly Income</span>
-                        <span class="mockup-stat__value text-success">+₹45,000</span>
-                    </div>
-                </div>
-                <div class="mockup-chart">
-                    <div class="mockup-chart__bar" style="height: 40%"></div>
-                    <div class="mockup-chart__bar" style="height: 60%"></div>
-                    <div class="mockup-chart__bar highlight" style="height: 80%"></div>
-                    <div class="mockup-chart__bar" style="height: 50%"></div>
-                    <div class="mockup-chart__bar" style="height: 70%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 </section>
 
 <section class="features-grid">
@@ -75,11 +45,12 @@
 <style>
 .hero-section {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 4rem;
-    padding: 6rem 1rem;
-    max-width: 1200px;
+    text-align: center;
+    gap: 2rem;
+    padding: 8rem 1rem;
+    max-width: 800px;
     margin: 0 auto;
 }
 

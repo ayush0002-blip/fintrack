@@ -19,7 +19,6 @@ def create_app(config_name='default'):
     from app.routes.budgets import budgets_bp
     from app.routes.subscriptions import subscriptions_bp
     from app.routes.settings import settings_bp
-    from app.routes.plaid import plaid_bp
     
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -29,6 +28,5 @@ def create_app(config_name='default'):
     app.register_blueprint(budgets_bp, url_prefix='/budgets')
     app.register_blueprint(subscriptions_bp, url_prefix='/subscriptions')
     app.register_blueprint(settings_bp, url_prefix='/settings')
-    app.register_blueprint(plaid_bp, url_prefix='/plaid')
     
     return app

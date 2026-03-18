@@ -81,39 +81,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Savings Trend (Line)
-    const savingsCtx = document.getElementById('savingsChart');
-    if (savingsCtx) {
-        const gradient = savingsCtx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
-        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
-
-        new Chart(savingsCtx, {
-            type: 'line',
-            data: {
-                labels: chartData.savings.labels,
-                datasets: [{
-                    label: 'Net Savings',
-                    data: chartData.savings.data,
-                    borderColor: '#6366f1', 
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    x: { grid: { display: false } },
-                    y: { grid: { color: gridColor } }
-                }
-            }
-        });
-    }
 });

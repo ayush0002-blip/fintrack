@@ -28,7 +28,6 @@ class User(UserMixin, db.Model):
     transactions  = db.relationship('Transaction',  backref='user', lazy='dynamic', cascade='all, delete-orphan')
     budgets       = db.relationship('Budget',       backref='user', lazy='dynamic', cascade='all, delete-orphan')
     subscriptions = db.relationship('Subscription', backref='user', lazy='dynamic', cascade='all, delete-orphan')
-    plaid_items   = db.relationship('PlaidItem',    backref='user', lazy='dynamic', cascade='all, delete-orphan')
 
     # ── Password helpers ────────────────────────────────────
     def set_password(self, password: str) -> None:
@@ -43,22 +42,6 @@ class User(UserMixin, db.Model):
     def __repr__(self) -> str:
         return f'<User id={self.id} email={self.email!r}>'
 
-
-# ─────────────────────────────────────────────────────────────
-# Plaid Item Model
-# ─────────────────────────────────────────────────────────────
-class PlaidItem(db.Model):
-    __tablename__ = 'plaid_items'
-
-    id               = db.Column(db.Integer, primary_key=True)
-    user_id          = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
-    access_token     = db.Column(db.String(256), nullable=False)
-    item_id          = db.Column(db.String(256), nullable=False)
-    institution_name = db.Column(db.String(128))
-    created_at       = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-
-    def __repr__(self) -> str:
-        return f'<PlaidItem id={self.id} item_id={self.item_id!r}>'
 
 
 # ─────────────────────────────────────────────────────────────

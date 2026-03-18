@@ -1,0 +1,44 @@
+# FinTrack Project Explanation
+
+## Why is multiple users' data stored?
+FinTrack is designed to be a personal finance tool for many people. To make this work, each person (user) needs their own private space. We store data for multiple users so that everyone can have their own account, log in securely, and see only their own transactions, budgets, and subscriptions.
+
+## Where is the data stored?
+All data is stored in a **Database**. We use a tool called **SQLAlchemy** (an ORM) to talk to the database. 
+
+**Physical File Location:**
+`c:\project\fintrack\instance\app.db`
+
+This single file (`app.db`) contains all the tables (users, transactions, budgets, etc.).
+
+## Is there a limit on the number of users?
+**No, there is no hard limit in the code.**
+The system allows as many users as your computer's storage (Hard Drive) can handle. Since a user account only takes up a tiny amount of text space, you could easily have thousands or even millions of users before running into any storage issues.
+
+## Exactly where is the code?
+
+### 1. The Database Structure (Models)
+The "blueprint" for how data is organized is in:
+`c:\project\fintrack\app\models.py`
+
+In this file, you will see a `User` class. You will also see other classes like `Transaction` and `Budget` that have a line:
+`user_id = db.Column(db.Integer, db.ForeignKey('users.id'))`
+
+This `user_id` is like a "tag" that says exactly which person owns that specific piece of data.
+
+### 2. Keeping Data Private (Security)
+To make sure User A cannot see User B's data, we filter the database queries. The code that does this is in the "Routes".
+
+For example, look at:
+`c:\project\fintrack\app\routes\transactions.py` (Line 24)
+
+You will see:
+`q = current_user.transactions`
+
+Instead of asking the database for *every* transaction, the code says: "Go to the current logged-in user and only give me the transactions linked to them." This ensures complete privacy.
+
+### 3. Login and Identity
+The system knows who "you" are because of the code in:
+`c:\project\fintrack\app\routes\auth.py`
+
+This file handles signing up, logging in, and logging out. It uses **Flask-Login** to keep track of which user is currently using the app.

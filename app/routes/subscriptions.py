@@ -46,7 +46,21 @@ def create():
         db.session.commit()
         flash('Subscription added.', 'success')
         return redirect(url_for('subscriptions.index'))
-    return render_template('subscriptions.html', form=form, action='New', show_modal=True)
+    
+    # Need to pass context for the background template
+    subs = SubscriptionService.get_all_enriched(current_user)
+    monthly_total = SubscriptionService.get_monthly_total(current_user)
+    upcoming_count = SubscriptionService.get_upcoming_count(current_user)
+    
+    return render_template(
+        'subscriptions.html', 
+        form=form, 
+        action='New', 
+        show_modal=True,
+        subscriptions=subs,
+        monthly_total=monthly_total,
+        upcoming_count=upcoming_count
+    )
 
 
 # ─────────────────────────────────────────────────────────────
@@ -64,7 +78,22 @@ def edit(sub_id):
         db.session.commit()
         flash('Subscription updated.', 'success')
         return redirect(url_for('subscriptions.index'))
-    return render_template('subscriptions.html', form=form, sub_id=sub_id, action='Edit', show_modal=True)
+    
+    # Need to pass context for the background template
+    subs = SubscriptionService.get_all_enriched(current_user)
+    monthly_total = SubscriptionService.get_monthly_total(current_user)
+    upcoming_count = SubscriptionService.get_upcoming_count(current_user)
+    
+    return render_template(
+        'subscriptions.html', 
+        form=form, 
+        sub_id=sub_id, 
+        action='Edit', 
+        show_modal=True,
+        subscriptions=subs,
+        monthly_total=monthly_total,
+        upcoming_count=upcoming_count
+    )
 
 
 # ─────────────────────────────────────────────────────────────
