@@ -65,6 +65,7 @@ def login():
         email     = request.form.get('email', '').strip().lower()
         password  = request.form.get('password', '')
         remember  = bool(request.form.get('remember'))
+        role      = request.form.get('role', 'client')
 
         user = User.query.filter_by(email=email).first()
 
@@ -72,7 +73,17 @@ def login():
             flash('Invalid email or password. Please try again.', 'danger')
             return render_template('auth/login.html', email=email)
 
+        # Role-based validation
+        if role == 'admin' and not user.is_admin:
+            flash('This account does not have administrative privileges.', 'danger')
+            return render_template('auth/login.html', email=email)
+
         login_user(user, remember=remember)
+        
+        if user.is_admin:
+            flash(f'Welcome Admin, {user.full_name.split()[0]}! 🛡️', 'success')
+            return redirect(url_for('admin.clients'))
+
         flash(f'Welcome back, {user.full_name.split()[0]}!', 'success')
 
         # Honour the next parameter (safe redirect)

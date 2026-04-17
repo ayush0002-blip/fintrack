@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Client Management – Admin Panel{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="header-section">
+        <div>
+            <h1 class="page-title">Client Management</h1>
+            <p class="text-muted">Overview of all registered clients and their financial status.</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-card__icon" style="background: rgba(var(--accent-rgb), 0.1); color: var(--accent);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-card__content">
+                <span class="stat-card__label">Total Clients</span>
+                <span class="stat-card__value">{{ clients|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 24px; padding: 0; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Client Name</th>
+                        <th>Email</th>
+                        <th class="text-right">Total Income</th>
+                        <th class="text-right">Total Expense</th>
+                        <th class="text-right">Monthly Subs</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in clients %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('admin.client_detail', user_id=item.user.id) }}" style="text-decoration: none; display: flex; align-items: center; gap: 12px; color: inherit;">
+                                <div class="avatar-circle">{{ item.user.full_name[0] }}</div>
+                                <span style="font-weight: 600; color: var(--accent);">{{ item.user.full_name }}</span>
+                            </a>
+                        </td>
+                        <td>{{ item.user.email }}</td>
+                        <td class="text-right text-success" style="font-weight: 600;">₹{{ "{:,.2f}".format(item.total_income) }}</td>
+                        <td class="text-right text-danger" style="font-weight: 600;">₹{{ "{:,.2f}".format(item.total_expense) }}</td>
+                        <td class="text-right" style="font-weight: 600;">₹{{ "{:,.2f}".format(item.total_subs) }}</td>
+                        <td class="text-right">
+                            <a href="{{ url_for('admin.client_detail', user_id=item.user.id) }}" class="btn btn--ghost btn--sm">View Full Data</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">No clients found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+.data-table th {
+    padding: 16px 24px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+.data-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+.badge--neutral {
+    background: var(--bg-page);
+    color: var(--text-primary);
+}
+</style>
+{% endblock %}

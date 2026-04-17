@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Client Profile: {{ client.full_name }} – Admin Panel{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="header-section" style="margin-bottom: 32px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a href="{{ url_for('admin.clients') }}" class="btn-icon" title="Back to Clients">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </a>
+            <div>
+                <h1 class="page-title">{{ client.full_name }}</h1>
+                <p class="text-muted">{{ client.email }} &bull; Joined {{ client.created_at.strftime('%B %Y') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-card__icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-card__content">
+                <span class="stat-card__label">Total Income</span>
+                <span class="stat-card__value">₹{{ "{:,.2f}".format(income_sum) }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-card__content">
+                <span class="stat-card__label">Total Expense</span>
+                <span class="stat-card__value">₹{{ "{:,.2f}".format(expense_sum) }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__icon" style="background: rgba(var(--accent-rgb), 0.1); color: var(--accent);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <div class="stat-card__content">
+                <span class="stat-card__label">Total Budget</span>
+                <span class="stat-card__value">₹{{ "{:,.2f}".format(total_budget) }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card__icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="stat-card__content">
+                <span class="stat-card__label">Monthly Subs</span>
+                <span class="stat-card__value">₹{{ "{:,.2f}".format(subs_sum) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid" style="margin-top: 32px; display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
+        <!-- Left: Transactions & Subscriptions -->
+        <div style="display: flex; flex-direction: column; gap: 32px;">
+            <!-- Transactions Section -->
+            <div class="card">
+                <div class="card__header">
+                    <h2 class="card__title">Recent Transactions</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Date</th>
+                                <th class="text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in transactions %}
+                            <tr>
+                                <td style="font-weight: 500;">{{ tx.title }}</td>
+                                <td>{{ tx.category }}</td>
+                                <td class="text-muted">{{ tx.date.strftime('%b %d') }}</td>
+                                <td class="text-right {% if tx.type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if tx.type == 'income' %}+{% else %}-{% endif %}₹{{ "{:,.2f}".format(tx.amount) }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center py-4">No transactions.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Subscriptions Section -->
+            <div class="card">
+                <div class="card__header">
+                    <h2 class="card__title">Active Subscriptions</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Cycle</th>
+                                <th>Next Due</th>
+                                <th class="text-right">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sub in subscriptions %}
+                            <tr>
+                                <td style="font-weight: 500;">{{ sub.name }}</td>
+                                <td class="text-muted">{{ sub.billing_cycle|capitalize }}</td>
+                                <td>{{ sub.next_due_date.strftime('%b %d, %Y') }}</td>
+                                <td class="text-right" style="font-weight: 600;">₹{{ "{:,.2f}".format(sub.amount) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center py-4">No subscriptions.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Budgets -->
+        <div style="display: flex; flex-direction: column; gap: 32px;">
+            <div class="card">
+                <div class="card__header">
+                    <h2 class="card__title">Monthly Budgets</h2>
+                </div>
+                <div class="budget-list" style="display: flex; flex-direction: column; gap: 20px; padding: 24px;">
+                    {% for budget in budgets %}
+                    <div class="budget-item">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-weight: 600;">{{ budget.category }}</span>
+                            <span class="text-muted">₹{{ "{:,.0f}".format(budget.monthly_limit) }} limit</span>
+                        </div>
+                        <div class="progress-bar" style="height: 8px; background: var(--bg-page); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-fill" style="width: 65%; height: 100%; background: var(--accent); border-radius: 4px;"></div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No budgets set.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.text-success { color: #22c55e; }
+.text-danger { color: #ef4444; }
+.data-table td { padding: 12px 24px; font-size: 0.9rem; }
+</style>
+{% endblock %}

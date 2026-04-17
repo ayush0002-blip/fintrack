@@ -134,8 +134,48 @@
         <h1 class="auth-card__heading">Welcome back</h1>
         <p class="auth-card__sub">Sign in to your FinTrack account.</p>
 
+        <!-- Role Selector (Pop-up style toggle) -->
+        <div class="role-selector">
+            <button type="button" class="role-btn role-btn--active" data-role="client">Client</button>
+            <button type="button" class="role-btn" data-role="admin">Admin</button>
+        </div>
+
+        <style>
+            .role-selector {
+                background: var(--bg-page);
+                padding: 4px;
+                border-radius: 12px;
+                display: flex;
+                gap: 4px;
+                margin-bottom: 28px;
+                border: 1px solid var(--border);
+            }
+            .role-btn {
+                flex: 1;
+                padding: 10px;
+                border: none;
+                background: none;
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: var(--text-secondary);
+                cursor: pointer;
+                border-radius: 8px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .role-btn--active {
+                background: var(--bg-surface);
+                color: var(--accent);
+                box-shadow: var(--shadow-sm);
+            }
+            .admin-mode .auth-card {
+                border-color: var(--accent);
+                box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.15);
+            }
+        </style>
+
         <!-- Login Form -->
         <form method="POST" action="{{ url_for('auth.login') }}" novalidate id="login-form">
+            <input type="hidden" name="role" id="login-role" value="client">
 
             <div class="form-group">
                 <label class="form-label" for="email">Email address</label>
@@ -206,6 +246,26 @@
             btn.querySelector('svg').style.opacity = isText ? '1' : '0.5';
         });
     }
+
+    // Role Selector Logic
+    var roleBtns = document.querySelectorAll('.role-btn');
+    var roleInput = document.getElementById('login-role');
+    var authCard = document.querySelector('.auth-card');
+
+    roleBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            roleBtns.forEach(b => b.classList.remove('role-btn--active'));
+            btn.classList.add('role-btn--active');
+            var role = btn.getAttribute('data-role');
+            roleInput.value = role;
+
+            if (role === 'admin') {
+                authCard.classList.add('admin-mode');
+            } else {
+                authCard.classList.remove('admin-mode');
+            }
+        });
+    });
 })();
 </script>
 {% endblock %}
